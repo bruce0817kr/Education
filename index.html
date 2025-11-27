@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>2025 GTP AI 스마트워크 가이드 (v25.10 Final Resource Pack)</title>
+    <title>2025 GTP AI 스마트워크 가이드 (v25.11 Final Bug Fix)</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -78,7 +78,7 @@
                 <div class="bg-blue-700 text-white font-bold px-3 py-1 rounded-lg">GTP</div>
                 <div>
                     <h1 class="text-lg font-bold text-gray-900">경기테크노파크 AI 스마트워크</h1>
-                    <p class="text-xs text-gray-500">v25.10 (Final: With Resource Pack)</p>
+                    <p class="text-xs text-gray-500">v25.11 (Final: With Resource Pack)</p>
                 </div>
             </div>
             <div class="flex items-center gap-4">
@@ -873,6 +873,31 @@ Color: Trustworthy Blue and White.</div>
             reader.readAsDataURL(file);
         }
 
+        // Resource Map File Handler (Special for Chapter 4)
+        function handleResourceDrop(e) {
+            e.preventDefault(); e.stopPropagation();
+            e.currentTarget.classList.remove('drop-active');
+            if (e.dataTransfer.files && e.dataTransfer.files[0]) {
+                handleResourceFile(e.dataTransfer.files[0]);
+            }
+        }
+        function handleResourceFile(file) {
+            if (!file.type.startsWith('image/')) { alert('이미지 파일만 가능합니다.'); return; }
+            const modalBody = document.getElementById('modal-body');
+            const img = modalBody.querySelector('#resource-img');
+            const fallback = modalBody.querySelector('#resource-fallback');
+            
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                if (img) {
+                    img.src = e.target.result;
+                    img.style.display = 'block';
+                    if(fallback) fallback.classList.add('hidden');
+                }
+            };
+            reader.readAsDataURL(file);
+        }
+
         const PROMPT_DATA = {
              'killer-style': {
                 prompt: '보고서 스타일 변환',
@@ -1152,7 +1177,8 @@ function onEdit(e) {
 
         async function runDemo(key, btn) {
             const data = PROMPT_DATA[key];
-            const container = btn.closest('div');
+            // [FIXED] Changed from btn.closest('div') to specific modal selector to capture full context including prompt box
+            const container = btn.closest('[id^="modal-"]') || btn.closest('div').parentElement; 
             const outputDiv = container.querySelector('.gemini-output');
             const previewDiv = document.getElementById('mail-preview-area');
             const imageDiv = document.getElementById('image-result-area');
